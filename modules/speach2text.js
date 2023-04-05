@@ -1,10 +1,11 @@
 import axios from 'axios'
 import { delay } from './common.js';
+import { assembly_token } from '../secret.js';
 
 const assembly = axios.create({
     baseURL: "https://api.assemblyai.com/v2",
     headers: {
-        authorization: "d16b57f1f8794202849ade7e23c8b6dd",
+        authorization: assembly_token,
     },
 });
 

@@ -1,7 +1,8 @@
 import { ChatGPTAPI } from 'chatgpt'
+import { chat_gpt_key } from '../secret';
 
 const api = new ChatGPTAPI({
-    apiKey: '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'
+    apiKey: chat_gpt_key
   })
 
 export async function getChatGPTResponse(message){
