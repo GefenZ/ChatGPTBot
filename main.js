@@ -59,7 +59,7 @@ async function start(client) {
 
       const filePath = `./audios/${message.id}.mp3`;
       
-      await getMp3FromText(api_res, filePath);
+      await getMp3FromText(api_res, message.id);
       
       // make sure the file is indeed created:
       let isFileCreated = fs.existsSync(filePath)
@@ -90,7 +90,7 @@ async function start(client) {
           isVoiceSent = false
         });
       }
-      //result.to._serialized
+      
       messagesToIgnore.push(result.to._serialized)
 
       removeFile(filePath);
