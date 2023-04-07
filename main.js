@@ -5,13 +5,10 @@ import { getChatGPTResponse } from './modules/chatgpt.js'
 import { getTextFromMp3 } from './modules/speach2text.js'
 import { getMp3FromText } from './modules/text2speach.js'
 import { removeFile, delay } from './modules/common.js';
-import config from './config.json'
+import config from './config.json' assert { type: "json" };
 import * as constants from './const.js'
 
 var messagesToIgnore = [];
-
-// import fs from 'fs'
-// import getMP3Duration from 'get-mp3-duration'
 
 // function base64_encode(file) {
 //   return "data:audio/mpeg;base64,"+fs.readFileSync(file, 'base64');

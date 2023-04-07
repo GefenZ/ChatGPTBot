@@ -2,7 +2,7 @@ import say from 'say'
 import fs from 'fs'
 import { delay, removeFile } from './common.js'
 import * as constants from '../const.js'
-import config from '../config.json'
+import config from '../config.json' assert { type: "json" };
 import { exec } from 'child_process'
 
 export async function getMp3FromText(text, messageId){

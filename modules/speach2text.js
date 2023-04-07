@@ -1,7 +1,7 @@
 import axios from 'axios'
 import { delay } from './common.js';
 import { assembly_token } from '../secret.js';
-import config from '../config.json'
+import config from '../config.json' assert { type: "json" };
 
 const assembly = axios.create({
     baseURL: "https://api.assemblyai.com/v2",

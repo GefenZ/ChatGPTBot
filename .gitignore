@@ -15,3 +15,5 @@ resources/.arch-internal-preview.css
 node_modules
 tokens
 secret.js
+error.txt
+log.txt
