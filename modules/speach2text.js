@@ -1,6 +1,7 @@
 import axios from 'axios'
 import { delay } from './common.js';
 import { assembly_token } from '../secret.js';
+import config from '../config.json'
 
 const assembly = axios.create({
     baseURL: "https://api.assemblyai.com/v2",
@@ -21,7 +22,7 @@ export async function getTextFromMp3(media){
         var resp = await assembly.get(`/transcript/${transcript_res.data.id}`);
         status = resp.data.status;
         console.log(status);
-        await delay(2000);
+        await delay(config.default_delay_time);
     }
     return resp.data.text;
 }

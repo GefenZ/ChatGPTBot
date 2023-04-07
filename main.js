@@ -5,6 +5,8 @@ import { getChatGPTResponse } from './modules/chatgpt.js'
 import { getTextFromMp3 } from './modules/speach2text.js'
 import { getMp3FromText } from './modules/text2speach.js'
 import { removeFile, delay } from './modules/common.js';
+import config from './config.json'
+import * as constants from './const.js'
 
 var messagesToIgnore = [];
 
@@ -16,7 +18,7 @@ var messagesToIgnore = [];
 // }
 
 venom.create({
-    session: 'chatGptSession', //name of session 
+    session: config.session_name, //name of session 
     multidevice: true // for version not multidevice use false.(default: true)
   })
   .then(async (client) => await start(client))
@@ -27,7 +29,7 @@ venom.create({
 async function start(client) {
   await client.onAnyMessage(async (message) => {
     let result;
-    if(message.chatId == '120363099429046214@g.us'){
+    if(message.chatId == config.chatGPT_chat_id){
       console.log(message)
 
       let messageText;
@@ -37,24 +39,24 @@ async function start(client) {
         return;
       }
 
-      if(message.type === 'ptt'){
+      if(message.type === constants.VOICE_MESSAGE_TYPE){
         let media = await client.decryptFile(message);
       
         messageText = await getTextFromMp3(media);
   
         console.log(messageText)
   
-        result = await client.sendText('120363099429046214@g.us', `You asked: ${messageText}`);
+        result = await client.sendText(config.chatGPT_chat_id, `${config.transcripton_message_header}: ${messageText}`);
         messagesToIgnore.push(result.to._serialized)
       }
-      else if(message.type === 'chat'){
+      else if(message.type === constants.TEXT_MESSAGE_TYPE){
         messageText = message.content
       }
       else return;
 
       let api_res = await getChatGPTResponse(messageText);
       
-      result = await client.sendText('120363099429046214@g.us', `ChatGPT Says: ${api_res}`);
+      result = await client.sendText(config.chatGPT_chat_id, `${config.transcripton_message_header}: ${api_res}`);
       messagesToIgnore.push(result.to._serialized)
 
       const filePath = `./audios/${message.id}.mp3`;
@@ -65,7 +67,7 @@ async function start(client) {
       let isFileCreated = fs.existsSync(filePath)
       while(!isFileCreated){
           console.log("waiting for file to be created...")
-          await delay(2000)
+          await delay(config.default_delay_time)
           isFileCreated = fs.existsSync(filePath)
       }
 
@@ -73,8 +75,8 @@ async function start(client) {
       const duration = getMP3Duration(buffer);
       console.log(`file duration ${duration}`);
 
-      if(duration > 60000) {
-        result = await client.sendVoice('120363099429046214@g.us', "./audios/default.mp3");
+      if(duration > config.limit_voice_message_answer) {
+        result = await client.sendVoice(config.chatGPT_chat_id, config.default_voice_answer_path);
         messagesToIgnore.push(result.to._serialized)
         return;
       }
@@ -83,8 +85,8 @@ async function start(client) {
       while(!isVoiceSent){
         isVoiceSent = true;
         // let base64str = base64_encode('test.mp3')
-        await delay(2000);
-        result = await client.sendVoice('120363099429046214@g.us', filePath).catch(error => {
+        await delay(config.default_delay_time);
+        result = await client.sendVoice(config.chatGPT_chat_id, filePath).catch(error => {
           console.log("could not send voice message:")
           console.log(error)
           isVoiceSent = false
