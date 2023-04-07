@@ -1,0 +1,12 @@
+{
+    "say_voice": "Cellos",
+    "say_speed": 1,
+    "espeak_voice": "default",
+    "session_name": "chatGptSession",
+    "chatGPT_chat_id": "120363099429046214@g.us",
+    "default_voice_answer_path": "./audios/default.mp3",
+    "transcripton_message_header": "You asked",
+    "chatGPT_message_header": "ChatGPT Says",
+    "limit_voice_message_answer": 60000,
+    "default_delay_time": 2000
+}
