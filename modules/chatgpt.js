@@ -6,6 +6,10 @@ const api = new ChatGPTAPI({
   })
 
 export async function getChatGPTResponse(message){
-    let response = await api.sendMessage(message);
+    let response = await api.sendMessage(message).catch(err => {
+    	console.error(`unable to get chatGPT response for messsage - ${message}`);
+	console.error(err);
+	throw new Error();
+    })
     return response.text;
 }

@@ -26,6 +26,7 @@ venom.create({
 async function start(client) {
   await client.onAnyMessage(async (message) => {
     let result;
+    let shouldQuit = false;
     if(message.chatId == config.chatGPT_chat_id){
       console.log(message)
 
@@ -39,11 +40,18 @@ async function start(client) {
       if(message.type === constants.VOICE_MESSAGE_TYPE){
         let media = await client.decryptFile(message);
       
-        messageText = await getTextFromMp3(media);
-  
+        messageText = await getTextFromMp3(media).catch(err => {
+		shouldQuit = true;
+	});
+  	if(shouldQuit) return;
         console.log(messageText)
   
-        result = await client.sendText(config.chatGPT_chat_id, `${config.transcripton_message_header}: ${messageText}`);
+        result = await client.sendText(config.chatGPT_chat_id, `${config.transcripton_message_header}: ${messageText}`).catch(err => {
+	console.error(`unable to send message - ${messageText} to ${config.chatGPT_chat_id}`);
+	console.error(err);
+	shouldQuit = true;
+	})
+	if(shouldQuit) return;
         messagesToIgnore.push(result.to._serialized)
       }
       else if(message.type === constants.TEXT_MESSAGE_TYPE){
@@ -51,15 +59,26 @@ async function start(client) {
       }
       else return;
 
-      let api_res = await getChatGPTResponse(messageText);
-      
-      result = await client.sendText(config.chatGPT_chat_id, `${config.transcripton_message_header}: ${api_res}`);
-      messagesToIgnore.push(result.to._serialized)
+      let api_res = await getChatGPTResponse(messageText).catch(err => {
+      	shouldQuit = true;
+      });
+      if(shouldQuit) return;
+      result = await client.sendText(config.chatGPT_chat_id, `${config.chatGPT_message_header}: ${api_res}`).catch(err => {
+        console.error(`unable to send message - ${api_res} to ${config.chatGPT_chat_id}`);
+	console.error(err)
+	shouldQuit = true;
+        })
+	if(shouldQuit) return;
+      messagesToIgnore.push(result.to._serialized);
 
       const filePath = `./audios/${message.id}.mp3`;
       
-      await getMp3FromText(api_res, message.id);
-      
+      await getMp3FromText(api_res, message.id).catch(err => {
+      	console.error("could not get mp3 from text");
+	shouldQuit = true;
+      });
+      if(shouldQuit) return;
+
       // make sure the file is indeed created:
       let isFileCreated = fs.existsSync(filePath)
       while(!isFileCreated){
@@ -84,8 +103,8 @@ async function start(client) {
         // let base64str = base64_encode('test.mp3')
         await delay(config.default_delay_time);
         result = await client.sendVoice(config.chatGPT_chat_id, filePath).catch(error => {
-          console.log("could not send voice message:")
-          console.log(error)
+          console.error("could not send voice message:")
+          console.error(error)
           isVoiceSent = false
         });
       }
